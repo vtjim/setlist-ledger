@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setlist Ledger</title>
+<style>
+:root{color-scheme:light dark}
+body{margin:0}
+img{max-width:100%}
+</style>
+<style>
+:root{
+  --bg:#f5f0e3;
+  --surface:#fffdf7;
+  --surface-2:#ece3cd;
+  --border:#ddd0ab;
+  --text:#262014;
+  --text-dim:#7a6f56;
+  --accent:#b6552c;
+  --accent-dim:#d99a71;
+  --accent-bg:#f5e2d3;
+  --good:#4d6e52;
+  --good-bg:#e3ead9;
+  --mono-bg:#221d14;
+  --mono-text:#ece3cd;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#181410;
+    --surface:#221d16;
+    --surface-2:#2c2519;
+    --border:#443a28;
+    --text:#eee4cf;
+    --text-dim:#a89877;
+    --accent:#e08556;
+    --accent-dim:#8a5535;
+    --accent-bg:#372417;
+    --good:#8fc19c;
+    --good-bg:#233026;
+    --mono-bg:#0f0c08;
+    --mono-text:#eee4cf;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#181410;
+  --surface:#221d16;
+  --surface-2:#2c2519;
+  --border:#443a28;
+  --text:#eee4cf;
+  --text-dim:#a89877;
+  --accent:#e08556;
+  --accent-dim:#8a5535;
+  --accent-bg:#372417;
+  --good:#8fc19c;
+  --good-bg:#233026;
+  --mono-bg:#0f0c08;
+  --mono-text:#eee4cf;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  padding:2.5rem 1.5rem 5rem;
+}
+.wrap{max-width:900px;margin:0 auto}
+header{
+  border-bottom:2px solid var(--border);
+  padding-bottom:1.5rem;
+  margin-bottom:1.75rem;
+}
+h1{
+  font-family:"Fraunces", Georgia, serif;
+  font-weight:600;
+  font-size:2.4rem;
+  letter-spacing:-0.01em;
+  margin:0 0 0.35rem;
+  text-wrap:balance;
+}
+.subtitle{color:var(--text-dim);font-size:0.98rem;margin:0 0 1rem;max-width:52ch;line-height:1.5}
+.stats{
+  display:flex;
+  gap:1.75rem;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:0.82rem;
+  color:var(--text-dim);
+}
+.stats b{color:var(--text);font-weight:600;font-size:1rem}
+
+.controls{
+  position:sticky;
+  top:0;
+  background:var(--bg);
+  padding:1rem 0 1.1rem;
+  margin-bottom:0.5rem;
+  z-index:5;
+  display:flex;
+  flex-direction:column;
+  gap:0.7rem;
+}
+.search-row{display:flex;gap:0.6rem}
+#search{
+  flex:1;
+  font:inherit;
+  font-size:0.92rem;
+  padding:0.6rem 0.9rem;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface);
+  color:var(--text);
+}
+#search:focus{outline:2px solid var(--accent-dim);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:0.45rem}
+.chip{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:0.74rem;
+  padding:0.35rem 0.75rem;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text-dim);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background .12s,color .12s,border-color .12s;
+}
+.chip:hover{border-color:var(--accent-dim)}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.result-count{font-family:"IBM Plex Mono",monospace;font-size:0.74rem;color:var(--text-dim);margin-bottom:0.5rem}
+
+.collection{margin-bottom:1.5rem}
+.collection-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  padding:0 0.1rem 0.5rem;
+  border-bottom:1px solid var(--border);
+  margin-bottom:0.15rem;
+}
+.collection-name{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.15rem}
+.collection-sum{font-family:"IBM Plex Mono",monospace;font-size:0.75rem;color:var(--text-dim)}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:0.9rem;
+  align-items:center;
+  padding:0.65rem 0.15rem;
+  border-bottom:1px solid var(--border);
+}
+.row:last-child{border-bottom:none}
+.row-title{font-weight:600;font-size:0.94rem}
+.row-sub{color:var(--text-dim);font-size:0.78rem;margin-top:0.12rem}
+.row-tracks{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:0.78rem;
+  color:var(--text-dim);
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.row-link a{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:0.76rem;
+  color:var(--accent);
+  text-decoration:none;
+  padding:0.3rem 0.65rem;
+  border:1px solid var(--accent-dim);
+  border-radius:6px;
+  white-space:nowrap;
+}
+.row-link a:hover{background:var(--accent-bg)}
+.no-results{
+  padding:2.5rem 1rem;
+  text-align:center;
+  color:var(--text-dim);
+  font-size:0.9rem;
+}
+
+footer{
+  border-top:1px solid var(--border);
+  padding-top:1.25rem;
+  margin-top:2.5rem;
+  font-size:0.8rem;
+  color:var(--text-dim);
+  line-height:1.6;
+}
+
+@media (max-width:600px){
+  .row{grid-template-columns:1fr auto;grid-template-areas:"title title" "tracks link"}
+  .row-title{grid-area:title}
+  .row-tracks{grid-area:tracks}
+  .row-link{grid-area:link;justify-self:end}
+}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Setlist Ledger</h1>
+    <p class="subtitle">A running archive of live-taper recordings — Vermont jam scene, touring bands, and festival sets, sourced from archive.org and mirrored into a personal collection.</p>
+    <div class="stats"><span><b id="stat-shows">0</b> shows</span><span><b id="stat-tracks">0</b> tracks</span><span><b id="stat-collections">0</b> collections</span></div>
+  </header>
+
+  <div class="controls">
+    <div class="search-row">
+      <input id="search" type="text" placeholder="Search artist, venue, or date…" autocomplete="off">
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <p class="result-count" id="result-count"></p>
+  <div id="list"></div>
+
+  <footer>
+    Every show links to its original archive.org listing — stream or download the source recording directly. Recordings are taped and shared by the credited tapers; this page just tracks what's been collected. Built and kept current from a running library log.
+  </footer>
+</div>
+
+<script>
+const SHOWS = [
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Steely Dead", d:"2026-07-09", v:"", t:17, id:"sd2026-07-09"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Creamery Station", d:"2026-07-10", v:"", t:10, id:"CS2026-07-10"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Dead Man's Waltz", d:"2026-07-10", v:"", t:10, id:"DMW2026-07-10"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"God Street Wine", d:"2026-07-10", v:"", t:17, id:"gsw2026-07-10.sbd"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Splintered Sunlight", d:"2026-07-10", v:"", t:16, id:"ssun2026-07-10.sbd"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Brown Eyed Women", d:"2026-07-11", v:"", t:13, id:"bew2026-07-11.sbd"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Deadgrass", d:"2026-07-11", v:"", t:11, id:"deadgrass2026-07-11.sbd"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Giant Panda Guerilla Dub Squad", d:"2026-07-11", v:"", t:10, id:"gpgds2026-07-11"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Jatoba", d:"2026-07-11", v:"", t:13, id:"jatoba2026-07-11"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Jerry's Middle Finger", d:"2026-07-11", v:"", t:14, id:"jmf2026-07-11.sbd"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Pink Talking Fish", d:"2026-07-11", v:"", t:21, id:"ptf2026-07-11.sbd"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Terrafunk", d:"2026-07-11", v:"", t:17, id:"terrafunk2026-07-11"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Leftover Salmon", d:"2026-07-12", v:"", t:20, id:"los2026-07-12.sbd"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Maestro Soup", d:"2026-07-12", v:"", t:5, id:"MS2026-07-12.Matrix.ManchesterVT.flac16"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Mystic Dead", d:"2026-07-12", v:"", t:13, id:"MD2026-07-12.sbd"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Daniel Donato's Cosmic Country", d:"2026-08-15", v:"Jay Peak, VT", t:19, id:"danieldonato2026-08-15.MVBAKGHD"},
+
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"moe.", d:"2026-09-04", v:"", t:16, id:"moe2026-09-04"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Daniel Donato's Cosmic Country", d:"2026-09-04", v:"", t:11, id:"danieldonato2026-09-04"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Assembly of Dust", d:"2026-09-04", v:"", t:8, id:"aod2026-09-04"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Eggy", d:"2026-09-04", v:"", t:9, id:"eggy2026-09-04"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"The Hogslop String Band", d:"2026-09-04", v:"", t:11, id:"hsss2026-09-04"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Funky Dawgz Brass Band", d:"2026-09-04", v:"", t:8, id:"fdbb2026-09-04"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Dogs In A Pile", d:"2026-09-06", v:"", t:17, id:"DogsinaPile2026-09-06"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"moe.", d:"2026-09-05", v:"", t:16, id:"moe2026-09-05.m60.ck8.pas.sx-r4.24bit.flac"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Pink Talking Fish", d:"2026-09-06", v:"", t:11, id:"ptf2026-09-06.m260.tk62.sbd.flac"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Hilltop", d:"2026-09-06", v:"", t:8, id:"hilltop2026-09-06.sbdakgck22.holbrook"},
+
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Leftover Salmon", d:"2023-07-07", v:"", t:21, id:"los2023-07-07"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Sam Grisman Project", d:"2023-07-07", v:"", t:9, id:"SGP2023-07-07"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Neighbor", d:"2023-07-08", v:"", t:10, id:"nbr3pm2023-07-08.tcca.flac16"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Pigeons Playing Ping Pong", d:"2024-07-19", v:"", t:13, id:"pppp2024-07-19.MVBAKGHD"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"The Mallett Brothers Band", d:"2024-07-19", v:"", t:9, id:"TMBB2024-07-19.MVBAKGHD"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Del McCoury Band", d:"2024-07-20", v:"", t:24, id:"del2024-07-20.MVBAKGHD"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Charlie Parr", d:"2024-07-20", v:"", t:21, id:"cp2024-07-20.MVBAKGHD"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Eggy", d:"2024-07-20", v:"", t:11, id:"eggy2024-07-20.MVBAKGHD"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Infamous Stringdusters", d:"2024-07-20", v:"", t:12, id:"isd2024-07-20.MVBAKGHD"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Zach Nugent", d:"2025-07-11", v:"", t:13, id:"ZachNugent2025-07-11"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"LaMP", d:"2025-07-12", v:"", t:10, id:"LaMP2025-07-12.MVBAKGHD"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Dark Star Orchestra", d:"2025-07-12", v:"", t:24, id:"dso2025-07-12.MVBAKGHD"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Charlie Parr", d:"2025-07-12", v:"", t:18, id:"cp2025-07-12"},
+
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2023-08-13", v:"Jay's Peak Amphitheater, VT", t:14, id:"jrad2023-08-13.VERMONT_TAPERS_COLLECTIVE_FLAC"},
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-06-20", v:"Northlands Arts & Music Fest", t:12, id:"jrad2026-06-20.mbhoka200.flac24"},
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-08-01", v:"Quarry Amphitheater", t:13, id:"jrad2026-08-01.MK4.2496"},
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-08-14", v:"The Cuthbert Amphitheater, Eugene OR", t:15, id:"jrad-eugene2026-08-14"},
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-08-22", v:"Dillon Amphitheatre, CO", t:19, id:"jrad2026-08-22.-jazzbuph"},
+
+{c:"John Craigie", a:"John Craigie", d:"2024-01-10", v:"Paradiso, Amsterdam NL", t:25, id:"jcraigie2024-01-10"},
+{c:"John Craigie", a:"John Craigie", d:"2024-05-24", v:"DelFest", t:17, id:"jcraigie2024-05-24"},
+{c:"John Craigie", a:"John Craigie", d:"2025-01-30", v:"Zonnehuis, Amsterdam NL", t:21, id:"jcraigie2025-01-30.DPA4061.24bit"},
+{c:"John Craigie", a:"John Craigie & The Coffis Brothers", d:"2025-05-31", v:"Ogden Music Festival", t:12, id:"jcraigie2025-05-31"},
+
+{c:"Todd Snider", a:"Todd Snider", d:"2025-08-06", v:"The Orange Peel, Asheville NC", t:24, id:"ToddSnider2025-08-06.m21.flac24"},
+
+{c:"Snugfest — Ripton, VT", a:"LaMP", d:"2024-09-29", v:"", t:11, id:"LaMP2024-09-29.AKG414XLIICoffey"},
+{c:"Snugfest — Ripton, VT", a:"LaMP", d:"2025-09-28", v:"", t:13, id:"lamp25-09-28.mtx.hsm.flac24"},
+{c:"Snugfest — Ripton, VT", a:"Vorcza", d:"2025-09-28", v:"", t:10, id:"vorcza2025-09-28.mtx.hsm.flac24"},
+
+{c:"Lara Cwass Band", a:"Lara Cwass Band", d:"2026-06-05", v:"Burlington Discover Jazz Festival", t:6, id:"laracwassband26-06-05.mtx.hsm.flac24"},
+{c:"Lara Cwass Band", a:"Lara Cwass Band", d:"2026-09-04", v:"Zenbarn, Waterbury VT", t:12, id:"lcwass2026-09-04.VERMONT_TAPERS_COLLECTIVE_FLAC"},
+
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-08-05", v:"Einstein's Tap House, Burlington VT", t:14, id:"dd2025-08-05.VERMONT_TAPERS_COLLECTIVE_FLAC"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-09-06", v:"Creekfest, North Ferrisburgh VT", t:5, id:"dd2025-09-06.VERMONT_TAPERS_COLLECTIVE_FLAC"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2026-02-13", v:"Higher Ground Showcase Lounge", t:9, id:"dd2026-02-13.VERMONT_TAPERS_COLLECTIVE_FLAC"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2026-08-29", v:"\"Jam in the Parks\"", t:7, id:"dd2026-08-29.VERMONT_TAPERS_COLLECTIVE_FLAC"},
+{c:"Dobbs' Dead", a:"All Night Boogie Band", d:"2026-08-29", v:"\"Jam in the Parks\" (same bill)", t:9, id:""},
+{c:"Dobbs' Dead", a:"Double You", d:"2024-09-07", v:"Creekfest, North Ferrisburgh VT", t:8, id:"W2024-09-07.VERMONT_TAPERS_COLLECTIVE_FLAC"},
+
+{c:"One-off finds", a:"Soule Monde", d:"2026-05-23", v:"Lost Nation Brewery, Morrisville VT", t:17, id:"soulemonde2026-05-23.matrix"},
+{c:"One-off finds", a:"Scott Metzger (w/ Cline, Medeski, Martin)", d:"2025-11-20", v:"Bearsville Theater, Woodstock NY", t:15, id:"wolf2025-11-20.mg20"},
+{c:"One-off finds", a:"ESP + Soule Monde", d:"2023-05-28", v:"The Prindle Baldwin Barn, Hinesburg VT", t:12, id:"soulemonde2023-05-28.Vermont_Tapers_Collective_FLAC"},
+{c:"One-off finds", a:"Sans Souci: Tribute to JGB", d:"2026-08-28", v:"Camp Birch Hill Rec Hall, New Durham NH", t:21, id:"sanssouci2026-08-28.m260.tf-11.sbd.flac"},
+{c:"One-off finds", a:"Donna the Buffalo", d:"2013-10-25", v:"Higher Ground Showcase Lounge", t:26, id:"donna2013-10-25.fob.mc012.flac16"},
+{c:"One-off finds", a:"The Garcia Project", d:"2026-08-04", v:"Buffalo Ironworks, Buffalo NY", t:12, id:"TheGarciaProject08-04-2026"},
+{c:"One-off finds", a:"Jerry's Middle Finger", d:"2026-06-14", v:"Old Rock House, St. Louis MO", t:17, id:"jmf2026-06-14"},
+
+{c:"Found via library audit (Sep 2026)", a:"New Mastersounds", d:"2025-11-22", v:"Brooklyn Bowl", t:29, id:"nms2025-11-22.cmc622.sbd.matrix.flac24"},
+{c:"Found via library audit (Sep 2026)", a:"New Mastersounds", d:"2026-02-10", v:"Jam Cruise pool deck", t:19, id:"nms2026-02-10"},
+{c:"Found via library audit (Sep 2026)", a:"Nico Suave & The Mothership", d:"2022-05-07", v:"Nectar's", t:25, id:"NicoSuaveMothership2022-05-07"},
+{c:"Found via library audit (Sep 2026)", a:"Ryan Montbleau", d:"2025-03-29", v:"Higher Ground", t:21, id:"montbleau2025-03-29"},
+{c:"Found via library audit (Sep 2026)", a:"Lyle Brewer (opener)", d:"2025-03-29", v:"Higher Ground", t:8, id:"montbleau2025-03-29"},
+{c:"Found via library audit (Sep 2026)", a:"Organ Fairchild", d:"2024-07-13", v:"Dead of Summer Festival (2024)", t:9, id:"of2024-07-13"},
+{c:"Found via library audit (Sep 2026)", a:"Soule Monde", d:"2025-12-31", v:"Town Hall Theater — NYE", t:19, id:"soulemonde2025-12-31.akg414.m950"},
+{c:"Found via library audit (Sep 2026)", a:"Hug Your Farmer", d:"2025-11-21", v:"", t:24, id:"hyf20251121t23"},
+{c:"Found via library audit (Sep 2026)", a:"Pink Talking Fish", d:"2025-08-23", v:"Stateside Amphitheater, Jay Peak VT", t:10, id:""},
+];
+
+function fmtDate(d){
+  const dt = new Date(d + "T12:00:00");
+  return dt.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});
+}
+
+const collections = [...new Set(SHOWS.map(s=>s.c))];
+document.getElementById("stat-shows").textContent = SHOWS.length;
+document.getElementById("stat-tracks").textContent = SHOWS.reduce((s,x)=>s+x.t,0);
+document.getElementById("stat-collections").textContent = collections.length;
+
+const chipsEl = document.getElementById("chips");
+let activeChip = "all";
+const allChip = document.createElement("span");
+allChip.className = "chip active";
+allChip.textContent = "All";
+allChip.dataset.c = "all";
+chipsEl.appendChild(allChip);
+collections.forEach(c=>{
+  const chip = document.createElement("span");
+  chip.className = "chip";
+  chip.textContent = c.replace(/\s*—.*$/,"").replace(/\(.*\)/,"").trim();
+  chip.title = c;
+  chip.dataset.c = c;
+  chipsEl.appendChild(chip);
+});
+chipsEl.addEventListener("click", e=>{
+  const chip = e.target.closest(".chip");
+  if(!chip) return;
+  activeChip = chip.dataset.c;
+  [...chipsEl.children].forEach(c=>c.classList.toggle("active", c===chip));
+  render();
+});
+
+const searchEl = document.getElementById("search");
+searchEl.addEventListener("input", render);
+
+function render(){
+  const q = searchEl.value.trim().toLowerCase();
+  const listEl = document.getElementById("list");
+  listEl.innerHTML = "";
+  let shown = 0;
+
+  const byCollection = {};
+  SHOWS.forEach(s=>{
+    if(activeChip !== "all" && s.c !== activeChip) return;
+    const hay = (s.a + " " + s.v + " " + s.d + " " + s.c).toLowerCase();
+    if(q && !hay.includes(q)) return;
+    (byCollection[s.c] ||= []).push(s);
+    shown++;
+  });
+
+  document.getElementById("result-count").textContent =
+    shown === SHOWS.length ? `${shown} shows` : `${shown} of ${SHOWS.length} shows`;
+
+  if(shown === 0){
+    listEl.innerHTML = '<div class="no-results">No shows match that search.</div>';
+    return;
+  }
+
+  Object.keys(byCollection).forEach(c=>{
+    const rows = byCollection[c];
+    const wrap = document.createElement("div");
+    wrap.className = "collection";
+    const trackSum = rows.reduce((s,x)=>s+x.t,0);
+    wrap.innerHTML = `<div class="collection-head"><span class="collection-name">${c}</span><span class="collection-sum">${rows.length} show${rows.length!==1?"s":""} · ${trackSum} tracks</span></div>`;
+    rows.forEach(s=>{
+      const row = document.createElement("div");
+      row.className = "row";
+      const sub = [s.v, fmtDate(s.d)].filter(Boolean).join(" — ");
+      const linkHtml = s.id
+        ? `<span class="row-link"><a href="https://archive.org/details/${s.id}" target="_blank" rel="noopener">archive.org</a></span>`
+        : `<span class="row-link"></span>`;
+      row.innerHTML = `<div><div class="row-title">${s.a}</div><div class="row-sub">${sub}</div></div><span class="row-tracks">${s.t} trk</span>${linkHtml}`;
+      wrap.appendChild(row);
+    });
+    listEl.appendChild(wrap);
+  });
+}
+render();
+</script>
+</body>
+</html>
