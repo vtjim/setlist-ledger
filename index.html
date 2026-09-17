@@ -145,7 +145,9 @@ h1{
   grid-template-columns:1fr auto auto;
   gap:0.9rem;
   align-items:center;
-  padding:0.65rem 0.15rem;
+  padding:0.65rem 0.15rem 0.65rem 1.1rem;
+  border-left:2px solid var(--border);
+  margin-left:0.35rem;
   border-bottom:1px solid var(--border);
 }
 .row:last-child{border-bottom:none}
@@ -193,6 +195,7 @@ footer{
 }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
 </head>
 <body>
 
@@ -208,6 +211,7 @@ footer{
       <input id="search" type="text" placeholder="Search artist, venue, or date…" autocomplete="off">
     </div>
     <div class="chips" id="chips"></div>
+    <div class="chips" id="year-chips"></div>
   </div>
 
   <p class="result-count" id="result-count"></p>
@@ -341,6 +345,29 @@ chipsEl.addEventListener("click", e=>{
   render();
 });
 
+const years = [...new Set(SHOWS.map(s=>s.d.slice(0,4)))].sort((a,b)=>b-a);
+const yearChipsEl = document.getElementById("year-chips");
+let activeYear = "all";
+const allYearChip = document.createElement("span");
+allYearChip.className = "chip active";
+allYearChip.textContent = "All years";
+allYearChip.dataset.y = "all";
+yearChipsEl.appendChild(allYearChip);
+years.forEach(y=>{
+  const chip = document.createElement("span");
+  chip.className = "chip";
+  chip.textContent = y;
+  chip.dataset.y = y;
+  yearChipsEl.appendChild(chip);
+});
+yearChipsEl.addEventListener("click", e=>{
+  const chip = e.target.closest(".chip");
+  if(!chip) return;
+  activeYear = chip.dataset.y;
+  [...yearChipsEl.children].forEach(c=>c.classList.toggle("active", c===chip));
+  render();
+});
+
 const searchEl = document.getElementById("search");
 searchEl.addEventListener("input", render);
 
@@ -353,6 +380,7 @@ function render(){
   const byCollection = {};
   SHOWS.forEach(s=>{
     if(activeChip !== "all" && s.c !== activeChip) return;
+    if(activeYear !== "all" && s.d.slice(0,4) !== activeYear) return;
     const hay = (s.a + " " + s.v + " " + s.d + " " + s.c).toLowerCase();
     if(q && !hay.includes(q)) return;
     (byCollection[s.c] ||= []).push(s);
