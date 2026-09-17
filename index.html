@@ -99,7 +99,8 @@ h1{
   flex-direction:column;
   gap:0.7rem;
 }
-.search-row{display:flex;gap:0.6rem}
+.search-row{display:flex;gap:0.6rem;flex-wrap:wrap}
+.search-row input{min-width:180px}
 #search{
   flex:1;
   font:inherit;
@@ -111,6 +112,15 @@ h1{
   color:var(--text);
 }
 #search:focus{outline:2px solid var(--accent-dim);outline-offset:1px}
+#sort{
+  font:inherit;
+  font-size:0.85rem;
+  padding:0.6rem 0.8rem;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface);
+  color:var(--text);
+}
 .chips{display:flex;flex-wrap:wrap;gap:0.45rem}
 .chip{
   font-family:"IBM Plex Mono",monospace;
@@ -209,6 +219,14 @@ footer{
   <div class="controls">
     <div class="search-row">
       <input id="search" type="text" placeholder="Search artist, venue, or date…" autocomplete="off">
+      <select id="sort">
+        <option value="collection">Sort: by collection</option>
+        <option value="date-desc">Show date, newest first</option>
+        <option value="date-asc">Show date, oldest first</option>
+        <option value="im-desc">Recently added</option>
+        <option value="im-asc">Added, oldest first</option>
+        <option value="artist">Artist, A–Z</option>
+      </select>
     </div>
     <div class="chips" id="chips"></div>
     <div class="chips" id="year-chips"></div>
@@ -224,92 +242,100 @@ footer{
 
 <script>
 const SHOWS = [
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Steely Dead", d:"2026-07-09", v:"", t:17, id:"sd2026-07-09"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Creamery Station", d:"2026-07-10", v:"", t:10, id:"CS2026-07-10"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Dead Man's Waltz", d:"2026-07-10", v:"", t:10, id:"DMW2026-07-10"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"God Street Wine", d:"2026-07-10", v:"", t:17, id:"gsw2026-07-10.sbd"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Splintered Sunlight", d:"2026-07-10", v:"", t:16, id:"ssun2026-07-10.sbd"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Brown Eyed Women", d:"2026-07-11", v:"", t:13, id:"bew2026-07-11.sbd"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Deadgrass", d:"2026-07-11", v:"", t:11, id:"deadgrass2026-07-11.sbd"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Giant Panda Guerilla Dub Squad", d:"2026-07-11", v:"", t:10, id:"gpgds2026-07-11"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Jatoba", d:"2026-07-11", v:"", t:13, id:"jatoba2026-07-11"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Jerry's Middle Finger", d:"2026-07-11", v:"", t:14, id:"jmf2026-07-11.sbd"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Pink Talking Fish", d:"2026-07-11", v:"", t:21, id:"ptf2026-07-11.sbd"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Terrafunk", d:"2026-07-11", v:"", t:17, id:"terrafunk2026-07-11"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Leftover Salmon", d:"2026-07-12", v:"", t:20, id:"los2026-07-12.sbd"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Maestro Soup", d:"2026-07-12", v:"", t:5, id:"MS2026-07-12.Matrix.ManchesterVT.flac16"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Mystic Dead", d:"2026-07-12", v:"", t:13, id:"MD2026-07-12.sbd"},
-{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Daniel Donato's Cosmic Country", d:"2026-08-15", v:"Jay Peak, VT", t:19, id:"danieldonato2026-08-15.MVBAKGHD"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-03-26", v:"Zenbarn", t:14, id:"dd2025-03-26.MVBAKGHD", im:"2026-09-17"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-05-28", v:"Zenbarn", t:15, id:"dd2025-05-28.MVBAKGHD", im:"2026-09-17"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-06-25", v:"Zenbarn", t:16, id:"dd2025-06-25.MVBAKGHD", im:"2026-09-17"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-08-05", v:"Einstein's Tap House, Burlington VT", t:14, id:"dd2025-08-05.VERMONT_TAPERS_COLLECTIVE_FLAC", im:"2026-09-17"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-09-24", v:"Zenbarn", t:15, id:"dd2025-09-24.MVBAKGHD", im:"2026-09-17"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-10-22", v:"Zenbarn", t:16, id:"dd2025-10-22.MVBAKGHD", im:"2026-09-17"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-10-29", v:"Zenbarn", t:27, id:"dd2025-10-29.MVBAKGHD", im:"2026-09-17"},
+{c:"One-off finds", a:"Bean Voyage", d:"2026-09-06", v:"Radio Bean, Burlington VT (Farewell Celebration)", t:8, id:"radiobean20260906t16", im:"2026-09-17"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Steely Dead", d:"2026-07-09", v:"", t:17, id:"sd2026-07-09", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Creamery Station", d:"2026-07-10", v:"", t:10, id:"CS2026-07-10", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Dead Man's Waltz", d:"2026-07-10", v:"", t:10, id:"DMW2026-07-10", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"God Street Wine", d:"2026-07-10", v:"", t:17, id:"gsw2026-07-10.sbd", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Splintered Sunlight", d:"2026-07-10", v:"", t:16, id:"ssun2026-07-10.sbd", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Brown Eyed Women", d:"2026-07-11", v:"", t:13, id:"bew2026-07-11.sbd", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Deadgrass", d:"2026-07-11", v:"", t:11, id:"deadgrass2026-07-11.sbd", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Giant Panda Guerilla Dub Squad", d:"2026-07-11", v:"", t:10, id:"gpgds2026-07-11", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Jatoba", d:"2026-07-11", v:"", t:13, id:"jatoba2026-07-11", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Jerry's Middle Finger", d:"2026-07-11", v:"", t:14, id:"jmf2026-07-11.sbd", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Pink Talking Fish", d:"2026-07-11", v:"", t:21, id:"ptf2026-07-11.sbd", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Terrafunk", d:"2026-07-11", v:"", t:17, id:"terrafunk2026-07-11", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Leftover Salmon", d:"2026-07-12", v:"", t:20, id:"los2026-07-12.sbd", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Maestro Soup", d:"2026-07-12", v:"", t:5, id:"MS2026-07-12.Matrix.ManchesterVT.flac16", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Mystic Dead", d:"2026-07-12", v:"", t:13, id:"MD2026-07-12.sbd", im:"2026-09-13"},
+{c:"Dead of Summer Music Festival — Manchester, VT (Jul 2026)", a:"Daniel Donato's Cosmic Country", d:"2026-08-15", v:"Jay Peak, VT", t:19, id:"danieldonato2026-08-15.MVBAKGHD", im:"2026-09-13"},
 
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"moe.", d:"2026-09-04", v:"", t:16, id:"moe2026-09-04"},
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Daniel Donato's Cosmic Country", d:"2026-09-04", v:"", t:11, id:"danieldonato2026-09-04"},
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Assembly of Dust", d:"2026-09-04", v:"", t:8, id:"aod2026-09-04"},
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Eggy", d:"2026-09-04", v:"", t:9, id:"eggy2026-09-04"},
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"The Hogslop String Band", d:"2026-09-04", v:"", t:11, id:"hsss2026-09-04"},
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Funky Dawgz Brass Band", d:"2026-09-04", v:"", t:8, id:"fdbb2026-09-04"},
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Dogs In A Pile", d:"2026-09-06", v:"", t:17, id:"DogsinaPile2026-09-06"},
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"moe.", d:"2026-09-05", v:"", t:16, id:"moe2026-09-05.m60.ck8.pas.sx-r4.24bit.flac"},
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Pink Talking Fish", d:"2026-09-06", v:"", t:11, id:"ptf2026-09-06.m260.tk62.sbd.flac"},
-{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Hilltop", d:"2026-09-06", v:"", t:8, id:"hilltop2026-09-06.sbdakgck22.holbrook"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"moe.", d:"2026-09-04", v:"", t:16, id:"moe2026-09-04", im:"2026-09-14"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Daniel Donato's Cosmic Country", d:"2026-09-04", v:"", t:11, id:"danieldonato2026-09-04", im:"2026-09-14"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Assembly of Dust", d:"2026-09-04", v:"", t:8, id:"aod2026-09-04", im:"2026-09-14"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Eggy", d:"2026-09-04", v:"", t:9, id:"eggy2026-09-04", im:"2026-09-14"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"The Hogslop String Band", d:"2026-09-04", v:"", t:11, id:"hsss2026-09-04", im:"2026-09-14"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Funky Dawgz Brass Band", d:"2026-09-04", v:"", t:8, id:"fdbb2026-09-04", im:"2026-09-14"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Dogs In A Pile", d:"2026-09-06", v:"", t:17, id:"DogsinaPile2026-09-06", im:"2026-09-14"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"moe.", d:"2026-09-05", v:"", t:16, id:"moe2026-09-05.m60.ck8.pas.sx-r4.24bit.flac", im:"2026-09-14"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Pink Talking Fish", d:"2026-09-06", v:"", t:11, id:"ptf2026-09-06.m260.tk62.sbd.flac", im:"2026-09-14"},
+{c:"Adirondack Independence Music Festival (Sep 2026)", a:"Hilltop", d:"2026-09-06", v:"", t:8, id:"hilltop2026-09-06.sbdakgck22.holbrook", im:"2026-09-14"},
 
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Leftover Salmon", d:"2023-07-07", v:"", t:21, id:"los2023-07-07"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Sam Grisman Project", d:"2023-07-07", v:"", t:9, id:"SGP2023-07-07"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Neighbor", d:"2023-07-08", v:"", t:10, id:"nbr3pm2023-07-08.tcca.flac16"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Pigeons Playing Ping Pong", d:"2024-07-19", v:"", t:13, id:"pppp2024-07-19.MVBAKGHD"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"The Mallett Brothers Band", d:"2024-07-19", v:"", t:9, id:"TMBB2024-07-19.MVBAKGHD"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Del McCoury Band", d:"2024-07-20", v:"", t:24, id:"del2024-07-20.MVBAKGHD"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Charlie Parr", d:"2024-07-20", v:"", t:21, id:"cp2024-07-20.MVBAKGHD"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Eggy", d:"2024-07-20", v:"", t:11, id:"eggy2024-07-20.MVBAKGHD"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Infamous Stringdusters", d:"2024-07-20", v:"", t:12, id:"isd2024-07-20.MVBAKGHD"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Zach Nugent", d:"2025-07-11", v:"", t:13, id:"ZachNugent2025-07-11"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"LaMP", d:"2025-07-12", v:"", t:10, id:"LaMP2025-07-12.MVBAKGHD"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Dark Star Orchestra", d:"2025-07-12", v:"", t:24, id:"dso2025-07-12.MVBAKGHD"},
-{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Charlie Parr", d:"2025-07-12", v:"", t:18, id:"cp2025-07-12"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Leftover Salmon", d:"2023-07-07", v:"", t:21, id:"los2023-07-07", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Sam Grisman Project", d:"2023-07-07", v:"", t:9, id:"SGP2023-07-07", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Neighbor", d:"2023-07-08", v:"", t:10, id:"nbr3pm2023-07-08.tcca.flac16", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Pigeons Playing Ping Pong", d:"2024-07-19", v:"", t:13, id:"pppp2024-07-19.MVBAKGHD", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"The Mallett Brothers Band", d:"2024-07-19", v:"", t:9, id:"TMBB2024-07-19.MVBAKGHD", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Del McCoury Band", d:"2024-07-20", v:"", t:24, id:"del2024-07-20.MVBAKGHD", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Charlie Parr", d:"2024-07-20", v:"", t:21, id:"cp2024-07-20.MVBAKGHD", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Eggy", d:"2024-07-20", v:"", t:11, id:"eggy2024-07-20.MVBAKGHD", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Infamous Stringdusters", d:"2024-07-20", v:"", t:12, id:"isd2024-07-20.MVBAKGHD", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Zach Nugent", d:"2025-07-11", v:"", t:13, id:"ZachNugent2025-07-11", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"LaMP", d:"2025-07-12", v:"", t:10, id:"LaMP2025-07-12.MVBAKGHD", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Dark Star Orchestra", d:"2025-07-12", v:"", t:24, id:"dso2025-07-12.MVBAKGHD", im:"2026-09-15"},
+{c:"Jeezum Crow Music Festival — Jay Peak, VT", a:"Charlie Parr", d:"2025-07-12", v:"", t:18, id:"cp2025-07-12", im:"2026-09-15"},
 
-{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2023-08-13", v:"Jay's Peak Amphitheater, VT", t:14, id:"jrad2023-08-13.VERMONT_TAPERS_COLLECTIVE_FLAC"},
-{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-06-20", v:"Northlands Arts & Music Fest", t:12, id:"jrad2026-06-20.mbhoka200.flac24"},
-{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-08-01", v:"Quarry Amphitheater", t:13, id:"jrad2026-08-01.MK4.2496"},
-{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-08-14", v:"The Cuthbert Amphitheater, Eugene OR", t:15, id:"jrad-eugene2026-08-14"},
-{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-08-22", v:"Dillon Amphitheatre, CO", t:19, id:"jrad2026-08-22.-jazzbuph"},
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2023-08-13", v:"Jay's Peak Amphitheater, VT", t:14, id:"jrad2023-08-13.VERMONT_TAPERS_COLLECTIVE_FLAC", im:"2026-09-14"},
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-06-20", v:"Northlands Arts & Music Fest", t:12, id:"jrad2026-06-20.mbhoka200.flac24", im:"2026-09-14"},
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-08-01", v:"Quarry Amphitheater", t:13, id:"jrad2026-08-01.MK4.2496", im:"2026-09-14"},
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-08-14", v:"The Cuthbert Amphitheater, Eugene OR", t:15, id:"jrad-eugene2026-08-14", im:"2026-09-14"},
+{c:"Joe Russo's Almost Dead", a:"Joe Russo's Almost Dead", d:"2026-08-22", v:"Dillon Amphitheatre, CO", t:19, id:"jrad2026-08-22.-jazzbuph", im:"2026-09-14"},
 
-{c:"John Craigie", a:"John Craigie", d:"2024-01-10", v:"Paradiso, Amsterdam NL", t:25, id:"jcraigie2024-01-10"},
-{c:"John Craigie", a:"John Craigie", d:"2024-05-24", v:"DelFest", t:17, id:"jcraigie2024-05-24"},
-{c:"John Craigie", a:"John Craigie", d:"2025-01-30", v:"Zonnehuis, Amsterdam NL", t:21, id:"jcraigie2025-01-30.DPA4061.24bit"},
-{c:"John Craigie", a:"John Craigie & The Coffis Brothers", d:"2025-05-31", v:"Ogden Music Festival", t:12, id:"jcraigie2025-05-31"},
+{c:"John Craigie", a:"John Craigie", d:"2024-01-10", v:"Paradiso, Amsterdam NL", t:25, id:"jcraigie2024-01-10", im:"2026-09-15"},
+{c:"John Craigie", a:"John Craigie", d:"2024-05-24", v:"DelFest", t:17, id:"jcraigie2024-05-24", im:"2026-09-15"},
+{c:"John Craigie", a:"John Craigie", d:"2025-01-30", v:"Zonnehuis, Amsterdam NL", t:21, id:"jcraigie2025-01-30.DPA4061.24bit", im:"2026-09-15"},
+{c:"John Craigie", a:"John Craigie & The Coffis Brothers", d:"2025-05-31", v:"Ogden Music Festival", t:12, id:"jcraigie2025-05-31", im:"2026-09-15"},
 
-{c:"Todd Snider", a:"Todd Snider", d:"2025-08-06", v:"The Orange Peel, Asheville NC", t:24, id:"ToddSnider2025-08-06.m21.flac24"},
+{c:"Todd Snider", a:"Todd Snider", d:"2025-08-06", v:"The Orange Peel, Asheville NC", t:24, id:"ToddSnider2025-08-06.m21.flac24", im:"2026-09-15"},
 
-{c:"Snugfest — Ripton, VT", a:"LaMP", d:"2024-09-29", v:"", t:11, id:"LaMP2024-09-29.AKG414XLIICoffey"},
-{c:"Snugfest — Ripton, VT", a:"LaMP", d:"2025-09-28", v:"", t:13, id:"lamp25-09-28.mtx.hsm.flac24"},
-{c:"Snugfest — Ripton, VT", a:"Vorcza", d:"2025-09-28", v:"", t:10, id:"vorcza2025-09-28.mtx.hsm.flac24"},
+{c:"Snugfest — Ripton, VT", a:"LaMP", d:"2024-09-29", v:"", t:11, id:"LaMP2024-09-29.AKG414XLIICoffey", im:"2026-09-14"},
+{c:"Snugfest — Ripton, VT", a:"LaMP", d:"2025-09-28", v:"", t:13, id:"lamp25-09-28.mtx.hsm.flac24", im:"2026-09-14"},
+{c:"Snugfest — Ripton, VT", a:"Vorcza", d:"2025-09-28", v:"", t:10, id:"vorcza2025-09-28.mtx.hsm.flac24", im:"2026-09-14"},
 
-{c:"Lara Cwass Band", a:"Lara Cwass Band", d:"2026-06-05", v:"Burlington Discover Jazz Festival", t:6, id:"laracwassband26-06-05.mtx.hsm.flac24"},
-{c:"Lara Cwass Band", a:"Lara Cwass Band", d:"2026-09-04", v:"Zenbarn, Waterbury VT", t:12, id:"lcwass2026-09-04.VERMONT_TAPERS_COLLECTIVE_FLAC"},
+{c:"Lara Cwass Band", a:"Lara Cwass Band", d:"2026-06-05", v:"Burlington Discover Jazz Festival", t:6, id:"laracwassband26-06-05.mtx.hsm.flac24", im:"2026-09-14"},
+{c:"Lara Cwass Band", a:"Lara Cwass Band", d:"2026-09-04", v:"Zenbarn, Waterbury VT", t:12, id:"lcwass2026-09-04.VERMONT_TAPERS_COLLECTIVE_FLAC", im:"2026-09-14"},
 
-{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-08-05", v:"Einstein's Tap House, Burlington VT", t:14, id:"dd2025-08-05.VERMONT_TAPERS_COLLECTIVE_FLAC"},
-{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-09-06", v:"Creekfest, North Ferrisburgh VT", t:5, id:"dd2025-09-06.VERMONT_TAPERS_COLLECTIVE_FLAC"},
-{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2026-02-13", v:"Higher Ground Showcase Lounge", t:9, id:"dd2026-02-13.VERMONT_TAPERS_COLLECTIVE_FLAC"},
-{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2026-08-29", v:"\"Jam in the Parks\"", t:7, id:"dd2026-08-29.VERMONT_TAPERS_COLLECTIVE_FLAC"},
-{c:"Dobbs' Dead", a:"All Night Boogie Band", d:"2026-08-29", v:"\"Jam in the Parks\" (same bill)", t:9, id:""},
-{c:"Dobbs' Dead", a:"Double You", d:"2024-09-07", v:"Creekfest, North Ferrisburgh VT", t:8, id:"W2024-09-07.VERMONT_TAPERS_COLLECTIVE_FLAC"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-08-05", v:"Einstein's Tap House, Burlington VT", t:14, id:"dd2025-08-05.VERMONT_TAPERS_COLLECTIVE_FLAC", im:"2026-09-14"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-09-06", v:"Creekfest, North Ferrisburgh VT", t:5, id:"dd2025-09-06.VERMONT_TAPERS_COLLECTIVE_FLAC", im:"2026-09-14"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2026-02-13", v:"Higher Ground Showcase Lounge", t:9, id:"dd2026-02-13.VERMONT_TAPERS_COLLECTIVE_FLAC", im:"2026-09-14"},
+{c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2026-08-29", v:"\"Jam in the Parks\"", t:7, id:"dd2026-08-29.VERMONT_TAPERS_COLLECTIVE_FLAC", im:"2026-09-14"},
+{c:"Dobbs' Dead", a:"All Night Boogie Band", d:"2026-08-29", v:"\"Jam in the Parks\" (same bill)", t:9, id:"", im:"2026-09-14"},
+{c:"Dobbs' Dead", a:"Double You", d:"2024-09-07", v:"Creekfest, North Ferrisburgh VT", t:8, id:"W2024-09-07.VERMONT_TAPERS_COLLECTIVE_FLAC", im:"2026-09-14"},
 
-{c:"One-off finds", a:"Soule Monde", d:"2026-05-23", v:"Lost Nation Brewery, Morrisville VT", t:17, id:"soulemonde2026-05-23.matrix"},
-{c:"One-off finds", a:"Scott Metzger (w/ Cline, Medeski, Martin)", d:"2025-11-20", v:"Bearsville Theater, Woodstock NY", t:15, id:"wolf2025-11-20.mg20"},
-{c:"One-off finds", a:"ESP + Soule Monde", d:"2023-05-28", v:"The Prindle Baldwin Barn, Hinesburg VT", t:12, id:"soulemonde2023-05-28.Vermont_Tapers_Collective_FLAC"},
-{c:"One-off finds", a:"Sans Souci: Tribute to JGB", d:"2026-08-28", v:"Camp Birch Hill Rec Hall, New Durham NH", t:21, id:"sanssouci2026-08-28.m260.tf-11.sbd.flac"},
-{c:"One-off finds", a:"Donna the Buffalo", d:"2013-10-25", v:"Higher Ground Showcase Lounge", t:26, id:"donna2013-10-25.fob.mc012.flac16"},
-{c:"One-off finds", a:"The Garcia Project", d:"2026-08-04", v:"Buffalo Ironworks, Buffalo NY", t:12, id:"TheGarciaProject08-04-2026"},
-{c:"One-off finds", a:"Jerry's Middle Finger", d:"2026-06-14", v:"Old Rock House, St. Louis MO", t:17, id:"jmf2026-06-14"},
+{c:"One-off finds", a:"Soule Monde", d:"2026-05-23", v:"Lost Nation Brewery, Morrisville VT", t:17, id:"soulemonde2026-05-23.matrix", im:"2026-09-14"},
+{c:"One-off finds", a:"Scott Metzger (w/ Cline, Medeski, Martin)", d:"2025-11-20", v:"Bearsville Theater, Woodstock NY", t:15, id:"wolf2025-11-20.mg20", im:"2026-09-14"},
+{c:"One-off finds", a:"ESP + Soule Monde", d:"2023-05-28", v:"The Prindle Baldwin Barn, Hinesburg VT", t:12, id:"soulemonde2023-05-28.Vermont_Tapers_Collective_FLAC", im:"2026-09-14"},
+{c:"One-off finds", a:"Sans Souci: Tribute to JGB", d:"2026-08-28", v:"Camp Birch Hill Rec Hall, New Durham NH", t:21, id:"sanssouci2026-08-28.m260.tf-11.sbd.flac", im:"2026-09-14"},
+{c:"One-off finds", a:"Donna the Buffalo", d:"2013-10-25", v:"Higher Ground Showcase Lounge", t:26, id:"donna2013-10-25.fob.mc012.flac16", im:"2026-09-14"},
+{c:"One-off finds", a:"The Garcia Project", d:"2026-08-04", v:"Buffalo Ironworks, Buffalo NY", t:12, id:"TheGarciaProject08-04-2026", im:"2026-09-14"},
+{c:"One-off finds", a:"Jerry's Middle Finger", d:"2026-06-14", v:"Old Rock House, St. Louis MO", t:17, id:"jmf2026-06-14", im:"2026-09-14"},
 
-{c:"Found via library audit (Sep 2026)", a:"New Mastersounds", d:"2025-11-22", v:"Brooklyn Bowl", t:29, id:"nms2025-11-22.cmc622.sbd.matrix.flac24"},
-{c:"Found via library audit (Sep 2026)", a:"New Mastersounds", d:"2026-02-10", v:"Jam Cruise pool deck", t:19, id:"nms2026-02-10"},
-{c:"Found via library audit (Sep 2026)", a:"Nico Suave & The Mothership", d:"2022-05-07", v:"Nectar's", t:25, id:"NicoSuaveMothership2022-05-07"},
-{c:"Found via library audit (Sep 2026)", a:"Ryan Montbleau", d:"2025-03-29", v:"Higher Ground", t:21, id:"montbleau2025-03-29"},
-{c:"Found via library audit (Sep 2026)", a:"Lyle Brewer (opener)", d:"2025-03-29", v:"Higher Ground", t:8, id:"montbleau2025-03-29"},
-{c:"Found via library audit (Sep 2026)", a:"Organ Fairchild", d:"2024-07-13", v:"Dead of Summer Festival (2024)", t:9, id:"of2024-07-13"},
-{c:"Found via library audit (Sep 2026)", a:"Soule Monde", d:"2025-12-31", v:"Town Hall Theater — NYE", t:19, id:"soulemonde2025-12-31.akg414.m950"},
-{c:"Found via library audit (Sep 2026)", a:"Hug Your Farmer", d:"2025-11-21", v:"", t:24, id:"hyf20251121t23"},
-{c:"Found via library audit (Sep 2026)", a:"Pink Talking Fish", d:"2025-08-23", v:"Stateside Amphitheater, Jay Peak VT", t:10, id:""},
+{c:"Found via library audit (Sep 2026)", a:"New Mastersounds", d:"2025-11-22", v:"Brooklyn Bowl", t:29, id:"nms2025-11-22.cmc622.sbd.matrix.flac24", im:"2026-09-16"},
+{c:"Found via library audit (Sep 2026)", a:"New Mastersounds", d:"2026-02-10", v:"Jam Cruise pool deck", t:19, id:"nms2026-02-10", im:"2026-09-16"},
+{c:"Found via library audit (Sep 2026)", a:"Nico Suave & The Mothership", d:"2022-05-07", v:"Nectar's", t:25, id:"NicoSuaveMothership2022-05-07", im:"2026-09-16"},
+{c:"Found via library audit (Sep 2026)", a:"Ryan Montbleau", d:"2025-03-29", v:"Higher Ground", t:21, id:"montbleau2025-03-29", im:"2026-09-16"},
+{c:"Found via library audit (Sep 2026)", a:"Lyle Brewer (opener)", d:"2025-03-29", v:"Higher Ground", t:8, id:"montbleau2025-03-29", im:"2026-09-16"},
+{c:"Found via library audit (Sep 2026)", a:"Organ Fairchild", d:"2024-07-13", v:"Dead of Summer Festival (2024)", t:9, id:"of2024-07-13", im:"2026-09-16"},
+{c:"Found via library audit (Sep 2026)", a:"Soule Monde", d:"2025-12-31", v:"Town Hall Theater — NYE", t:19, id:"soulemonde2025-12-31.akg414.m950", im:"2026-09-16"},
+{c:"Found via library audit (Sep 2026)", a:"Hug Your Farmer", d:"2025-11-21", v:"", t:24, id:"hyf20251121t23", im:"2026-09-16"},
+{c:"Found via library audit (Sep 2026)", a:"Pink Talking Fish", d:"2025-08-23", v:"Stateside Amphitheater, Jay Peak VT", t:10, id:"", im:"2026-09-16"},
 ];
 
 function fmtDate(d){
@@ -371,21 +397,36 @@ yearChipsEl.addEventListener("click", e=>{
 const searchEl = document.getElementById("search");
 searchEl.addEventListener("input", render);
 
+const sortEl = document.getElementById("sort");
+sortEl.addEventListener("change", render);
+
+function renderRow(s, showImported){
+  const row = document.createElement("div");
+  row.className = "row";
+  const subParts = [s.v, fmtDate(s.d)];
+  if(showImported) subParts.push(`added ${fmtDate(s.im)}`);
+  const sub = subParts.filter(Boolean).join(" — ");
+  const linkHtml = s.id
+    ? `<span class="row-link"><a href="https://archive.org/details/${s.id}" target="_blank" rel="noopener">archive.org</a></span>`
+    : `<span class="row-link"></span>`;
+  row.innerHTML = `<div><div class="row-title">${s.a}</div><div class="row-sub">${sub}</div></div><span class="row-tracks">${s.t} trk</span>${linkHtml}`;
+  return row;
+}
+
 function render(){
   const q = searchEl.value.trim().toLowerCase();
+  const sortMode = sortEl.value;
   const listEl = document.getElementById("list");
   listEl.innerHTML = "";
-  let shown = 0;
 
-  const byCollection = {};
-  SHOWS.forEach(s=>{
-    if(activeChip !== "all" && s.c !== activeChip) return;
-    if(activeYear !== "all" && s.d.slice(0,4) !== activeYear) return;
+  const filtered = SHOWS.filter(s=>{
+    if(activeChip !== "all" && s.c !== activeChip) return false;
+    if(activeYear !== "all" && s.d.slice(0,4) !== activeYear) return false;
     const hay = (s.a + " " + s.v + " " + s.d + " " + s.c).toLowerCase();
-    if(q && !hay.includes(q)) return;
-    (byCollection[s.c] ||= []).push(s);
-    shown++;
+    if(q && !hay.includes(q)) return false;
+    return true;
   });
+  const shown = filtered.length;
 
   document.getElementById("result-count").textContent =
     shown === SHOWS.length ? `${shown} shows` : `${shown} of ${SHOWS.length} shows`;
@@ -395,24 +436,37 @@ function render(){
     return;
   }
 
-  Object.keys(byCollection).forEach(c=>{
-    const rows = byCollection[c];
-    const wrap = document.createElement("div");
-    wrap.className = "collection";
-    const trackSum = rows.reduce((s,x)=>s+x.t,0);
-    wrap.innerHTML = `<div class="collection-head"><span class="collection-name">${c}</span><span class="collection-sum">${rows.length} show${rows.length!==1?"s":""} · ${trackSum} tracks</span></div>`;
-    rows.forEach(s=>{
-      const row = document.createElement("div");
-      row.className = "row";
-      const sub = [s.v, fmtDate(s.d)].filter(Boolean).join(" — ");
-      const linkHtml = s.id
-        ? `<span class="row-link"><a href="https://archive.org/details/${s.id}" target="_blank" rel="noopener">archive.org</a></span>`
-        : `<span class="row-link"></span>`;
-      row.innerHTML = `<div><div class="row-title">${s.a}</div><div class="row-sub">${sub}</div></div><span class="row-tracks">${s.t} trk</span>${linkHtml}`;
-      wrap.appendChild(row);
+  if(sortMode === "collection"){
+    const byCollection = {};
+    filtered.forEach(s=>{ (byCollection[s.c] ||= []).push(s); });
+    Object.keys(byCollection).forEach(c=>{
+      const rows = byCollection[c];
+      const wrap = document.createElement("div");
+      wrap.className = "collection";
+      const trackSum = rows.reduce((s,x)=>s+x.t,0);
+      wrap.innerHTML = `<div class="collection-head"><span class="collection-name">${c}</span><span class="collection-sum">${rows.length} show${rows.length!==1?"s":""} · ${trackSum} tracks</span></div>`;
+      rows.forEach(s=> wrap.appendChild(renderRow(s, false)));
+      listEl.appendChild(wrap);
     });
-    listEl.appendChild(wrap);
-  });
+    return;
+  }
+
+  const sorted = [...filtered];
+  const showImported = sortMode.startsWith("im-");
+  if(sortMode === "date-desc") sorted.sort((a,b)=> b.d.localeCompare(a.d));
+  else if(sortMode === "date-asc") sorted.sort((a,b)=> a.d.localeCompare(b.d));
+  else if(sortMode === "im-desc") sorted.sort((a,b)=> b.im.localeCompare(a.im) || b.d.localeCompare(a.d));
+  else if(sortMode === "im-asc") sorted.sort((a,b)=> a.im.localeCompare(b.im) || a.d.localeCompare(b.d));
+  else if(sortMode === "artist") sorted.sort((a,b)=> a.a.localeCompare(b.a));
+
+  const wrap = document.createElement("div");
+  wrap.className = "collection";
+  const trackSum = sorted.reduce((s,x)=>s+x.t,0);
+  const label = {"date-desc":"Show date, newest first","date-asc":"Show date, oldest first",
+    "im-desc":"Recently added","im-asc":"Added, oldest first","artist":"Artist, A–Z"}[sortMode];
+  wrap.innerHTML = `<div class="collection-head"><span class="collection-name">${label}</span><span class="collection-sum">${sorted.length} show${sorted.length!==1?"s":""} · ${trackSum} tracks</span></div>`;
+  sorted.forEach(s=> wrap.appendChild(renderRow(s, showImported)));
+  listEl.appendChild(wrap);
 }
 render();
 </script>
