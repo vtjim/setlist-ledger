@@ -87,6 +87,8 @@ h1{
   color:var(--text-dim);
 }
 .stats b{color:var(--text);font-weight:600;font-size:1rem}
+.updated{font-family:"IBM Plex Mono",monospace;font-size:0.78rem;color:var(--text-dim);margin:0.9rem 0 0}
+.updated b{color:var(--text);font-weight:600}
 
 .controls{
   position:sticky;
@@ -214,6 +216,7 @@ footer{
     <h1>Setlist Ledger</h1>
     <p class="subtitle">A running archive of live-taper recordings — Vermont jam scene, touring bands, and festival sets, sourced from archive.org and mirrored into a personal collection.</p>
     <div class="stats"><span><b id="stat-shows">0</b> shows</span><span><b id="stat-tracks">0</b> tracks</span><span><b id="stat-collections">0</b> collections</span></div>
+    <p class="updated">Last updated with new shows: <b id="last-updated"></b></p>
   </header>
 
   <div class="controls">
@@ -241,6 +244,8 @@ footer{
 </div>
 
 <script>
+// Bump LAST_UPDATED (ISO, with offset) every time shows are added or regrouped.
+const LAST_UPDATED = "2026-09-24T19:30:00-04:00";
 const SHOWS = [
 {c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-03-26", v:"Zenbarn", t:14, id:"dd2025-03-26.MVBAKGHD", im:"2026-09-17"},
 {c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-05-28", v:"Zenbarn", t:15, id:"dd2025-05-28.MVBAKGHD", im:"2026-09-17"},
@@ -360,6 +365,7 @@ function fmtDate(d){
 
 const collections = [...new Set(SHOWS.map(s=>s.c))];
 document.getElementById("stat-shows").textContent = SHOWS.length;
+document.getElementById("last-updated").textContent = new Date(LAST_UPDATED).toLocaleString(undefined,{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"});
 document.getElementById("stat-tracks").textContent = SHOWS.reduce((s,x)=>s+x.t,0);
 document.getElementById("stat-collections").textContent = collections.length;
 
