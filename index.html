@@ -123,21 +123,16 @@ h1{
   background:var(--surface);
   color:var(--text);
 }
-.chips{display:flex;flex-wrap:wrap;gap:0.45rem}
-.chip{
-  font-family:"IBM Plex Mono",monospace;
-  font-size:0.74rem;
-  padding:0.35rem 0.75rem;
-  border-radius:999px;
+.filter-row{display:flex;flex-wrap:wrap;gap:0.6rem}
+.filter-row select{
+  font:inherit;
+  font-size:0.85rem;
+  padding:0.5rem 0.7rem;
   border:1px solid var(--border);
+  border-radius:8px;
   background:var(--surface);
-  color:var(--text-dim);
-  cursor:pointer;
-  white-space:nowrap;
-  transition:background .12s,color .12s,border-color .12s;
+  color:var(--text);
 }
-.chip:hover{border-color:var(--accent-dim)}
-.chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .result-count{font-family:"IBM Plex Mono",monospace;font-size:0.74rem;color:var(--text-dim);margin-bottom:0.5rem}
 
 .collection{margin-bottom:1.5rem}
@@ -223,16 +218,18 @@ footer{
     <div class="search-row">
       <input id="search" type="text" placeholder="Search artist, venue, or date…" autocomplete="off">
       <select id="sort">
-        <option value="collection">Sort: by collection</option>
+        <option value="im-desc" selected>Recently added</option>
+        <option value="im-asc">Added, oldest first</option>
         <option value="date-desc">Show date, newest first</option>
         <option value="date-asc">Show date, oldest first</option>
-        <option value="im-desc">Recently added</option>
-        <option value="im-asc">Added, oldest first</option>
         <option value="artist">Artist, A–Z</option>
+        <option value="collection">Sort: by collection</option>
       </select>
     </div>
-    <div class="chips" id="chips"></div>
-    <div class="chips" id="year-chips"></div>
+    <div class="filter-row">
+      <select id="collection-filter"><option value="all">All collections</option></select>
+      <select id="year-filter"><option value="all">All years</option></select>
+    </div>
   </div>
 
   <p class="result-count" id="result-count"></p>
@@ -245,7 +242,7 @@ footer{
 
 <script>
 // Bump LAST_UPDATED (ISO, with offset) every time shows are added or regrouped.
-const LAST_UPDATED = "2026-09-26T08:53:00-04:00";
+const LAST_UPDATED = "2026-09-27T14:16:00-04:00";
 const SHOWS = [
 {c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-03-26", v:"Zenbarn", t:14, id:"dd2025-03-26.MVBAKGHD", im:"2026-09-17"},
 {c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-05-28", v:"Zenbarn", t:15, id:"dd2025-05-28.MVBAKGHD", im:"2026-09-17"},
@@ -373,51 +370,27 @@ document.getElementById("last-updated").textContent = new Date(LAST_UPDATED).toL
 document.getElementById("stat-tracks").textContent = SHOWS.reduce((s,x)=>s+x.t,0);
 document.getElementById("stat-collections").textContent = collections.length;
 
-const chipsEl = document.getElementById("chips");
+const collectionFilterEl = document.getElementById("collection-filter");
 let activeChip = "all";
-const allChip = document.createElement("span");
-allChip.className = "chip active";
-allChip.textContent = "All";
-allChip.dataset.c = "all";
-chipsEl.appendChild(allChip);
 collections.forEach(c=>{
-  const chip = document.createElement("span");
-  chip.className = "chip";
-  chip.textContent = c.startsWith("Snugfest") ? "Snugfest " + c.match(/\((.*?)\)/)[1] : c.replace(/\s*—.*$/,"").replace(/\(.*\)/,"").trim();
-  chip.title = c;
-  chip.dataset.c = c;
-  chipsEl.appendChild(chip);
+  const opt = document.createElement("option");
+  opt.value = c;
+  opt.textContent = c.startsWith("Snugfest") ? "Snugfest " + c.match(/\((.*?)\)/)[1] : c.replace(/\s*—.*$/,"").replace(/\(.*\)/,"").trim();
+  opt.title = c;
+  collectionFilterEl.appendChild(opt);
 });
-chipsEl.addEventListener("click", e=>{
-  const chip = e.target.closest(".chip");
-  if(!chip) return;
-  activeChip = chip.dataset.c;
-  [...chipsEl.children].forEach(c=>c.classList.toggle("active", c===chip));
-  render();
-});
+collectionFilterEl.addEventListener("change", ()=>{ activeChip = collectionFilterEl.value; render(); });
 
 const years = [...new Set(SHOWS.map(s=>s.d.slice(0,4)))].sort((a,b)=>b-a);
-const yearChipsEl = document.getElementById("year-chips");
+const yearFilterEl = document.getElementById("year-filter");
 let activeYear = "all";
-const allYearChip = document.createElement("span");
-allYearChip.className = "chip active";
-allYearChip.textContent = "All years";
-allYearChip.dataset.y = "all";
-yearChipsEl.appendChild(allYearChip);
 years.forEach(y=>{
-  const chip = document.createElement("span");
-  chip.className = "chip";
-  chip.textContent = y;
-  chip.dataset.y = y;
-  yearChipsEl.appendChild(chip);
+  const opt = document.createElement("option");
+  opt.value = y;
+  opt.textContent = y;
+  yearFilterEl.appendChild(opt);
 });
-yearChipsEl.addEventListener("click", e=>{
-  const chip = e.target.closest(".chip");
-  if(!chip) return;
-  activeYear = chip.dataset.y;
-  [...yearChipsEl.children].forEach(c=>c.classList.toggle("active", c===chip));
-  render();
-});
+yearFilterEl.addEventListener("change", ()=>{ activeYear = yearFilterEl.value; render(); });
 
 const searchEl = document.getElementById("search");
 searchEl.addEventListener("input", render);
