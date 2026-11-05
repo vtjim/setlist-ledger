@@ -8,6 +8,13 @@
 :root{color-scheme:light dark}
 body{margin:0}
 img{max-width:100%}
+
+  .tapers{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid rgba(128,128,128,.3)}
+  .tapers h2{font-family:"Fraunces",serif;font-size:1.25rem;margin:0 0 .4rem}
+  .tapers p{font-size:.9rem;opacity:.8;margin:0 0 1rem}
+  .taper-list{display:flex;flex-wrap:wrap;gap:.4rem .5rem;padding:0;margin:0;list-style:none}
+  .taper-list li{font-size:.85rem;padding:.25rem .65rem;border:1px solid rgba(128,128,128,.35);border-radius:999px}
+  .taper-list li b{font-family:"IBM Plex Mono",monospace;font-weight:500;opacity:.7;margin-left:.35rem}
 </style>
 <style>
 :root{
@@ -235,6 +242,12 @@ footer{
   <p class="result-count" id="result-count"></p>
   <div id="list"></div>
 
+  <section class="tapers" id="tapers">
+    <h2>Thank you, tapers</h2>
+    <p>None of this exists without the people who carry the mics, mix the tapes and post them. Credited by taper, with the number of shows here from each.</p>
+    <ul class="taper-list"><li>Vermont Tapers Collective<b>19</b></li><li>Mark Van Blunk (MVB)<b>16</b></li><li>Ted Gakidis<b>11</b></li><li>Mike D (VT)<b>9</b></li><li>Cam Keough<b>8</b></li><li>Phil Fernandez<b>8</b></li><li>Rob Clarke<b>6</b></li><li>Brett S.<b>4</b></li><li>Jeff Travitz<b>4</b></li><li>Charlie<b>3</b></li><li>Hunting Sound Man<b>3</b></li><li>Keith Antaya &amp; family<b>3</b></li><li>G-Man<b>2</b></li><li>JT/NY<b>2</b></li><li>Z-Man<b>2</b></li><li>A Dutchbird production<b>1</b></li><li>Adam Lehman<b>1</b></li><li>Al W.<b>1</b></li><li>Alex Leary<b>1</b></li><li>Bob Crupi<b>1</b></li><li>Cotter Ellis<b>1</b></li><li>Danny Balfour<b>1</b></li><li>Eric McRoberts<b>1</b></li><li>Fireball<b>1</b></li><li>George Barrick<b>1</b></li><li>Gordon Wilson<b>1</b></li><li>Jay Hernandez<b>1</b></li><li>Jon Hart<b>1</b></li><li>Kyle Holbrook<b>1</b></li><li>Matt Coffey<b>1</b></li><li>Matt Nida<b>1</b></li><li>Oren Levy<b>1</b></li><li>Richard Skaggs<b>1</b></li><li>Rick Duro<b>1</b></li><li>Sam Cherubin<b>1</b></li><li>Taper Chris<b>1</b></li><li>Terry Killebrew<b>1</b></li><li>Top Hat Crew ( Big Jerry + LaDena Saxey )<b>1</b></li><li>Tulsa Taper<b>1</b></li><li>bill k<b>1</b></li><li>buckster<b>1</b></li><li>ceevans<b>1</b></li><li>sec1968<b>1</b></li><li>tom the taper<b>1</b></li></ul>
+  </section>
+
   <footer>
     Every show links to its original archive.org listing — stream or download the source recording directly. Recordings are taped and shared by the credited tapers; this page just tracks what's been collected. Built and kept current from a running library log.
   </footer>
@@ -242,7 +255,7 @@ footer{
 
 <script>
 // Bump LAST_UPDATED (ISO, with offset) every time shows are added or regrouped.
-const LAST_UPDATED = "2026-11-04T08:32:43-05:00";
+const LAST_UPDATED = "2026-11-05T07:48:48-05:00";
 const SHOWS = [
 {c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-03-26", v:"Zenbarn", t:14, id:"dd2025-03-26.MVBAKGHD", im:"2026-09-17"},
 {c:"Dobbs' Dead", a:"Dobbs' Dead", d:"2025-05-28", v:"Zenbarn", t:15, id:"dd2025-05-28.MVBAKGHD", im:"2026-09-17"},
@@ -273,6 +286,7 @@ const SHOWS = [
 {c:"Adirondack Independence Music Festival (Sep 2026)", a:"moe.", d:"2026-09-04", v:"", t:16, id:"moe2026-09-04", im:"2026-09-14"},
 {c:"Adirondack Independence Music Festival (Sep 2026)", a:"Daniel Donato's Cosmic Country", d:"2026-09-04", v:"", t:11, id:"danieldonato2026-09-04", im:"2026-09-14"},
 {c:"Adirondack Independence Music Festival (Sep 2026)", a:"Assembly of Dust", d:"2026-09-04", v:"", t:8, id:"aod2026-09-04", im:"2026-09-14"},
+{c:"One-off finds", a:"Joe Russo's Almost Dead", d:"2025-08-10", v:"Stateside Amphitheater, Jay VT", t:14, id:"jrad2025-08-10.ka500.flac24", im:"2026-11-05"},
 {c:"Adirondack Independence Music Festival (Sep 2026)", a:"Eggy", d:"2026-09-04", v:"", t:9, id:"eggy2026-09-04", im:"2026-09-14"},
 {c:"Adirondack Independence Music Festival (Sep 2026)", a:"The Hogslop String Band", d:"2026-09-04", v:"", t:11, id:"hsss2026-09-04", im:"2026-09-14"},
 {c:"Adirondack Independence Music Festival (Sep 2026)", a:"Funky Dawgz Brass Band", d:"2026-09-04", v:"", t:8, id:"fdbb2026-09-04", im:"2026-09-14"},
